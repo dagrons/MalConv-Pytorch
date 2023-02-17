@@ -6,7 +6,7 @@ import yaml
 import numpy as np
 import pandas as pd
 from src.util import ExeDataset, write_pred
-from src.model import MalConv, MalConvPadding
+from src.model import MalConv, MalConvPadding, MalConvMaskFirstBlock
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
@@ -98,7 +98,7 @@ del val_table
 
 model_cls = {
     'malconv': MalConv,
-    'malconvpadding': MalConvPadding
+    'malconvmask': MalConvMaskFirstBlock
 }
 
 malconv = model_cls[model_name](input_length=first_n_byte, window_size=window_size)

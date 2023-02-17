@@ -95,8 +95,8 @@ class MalConvRandomDos(nn.Module):
 
     def forward(self, x):
         # mask dos part
-        x[:, 0x2:0x18] = 256
-        x[:, 0x1a:0x3c] = 256
+        x[:, 0x2:0x18] = 0
+        x[:, 0x1a:0x3c] = 0
         x = self.embed(x)
         # Channel first
         x = torch.transpose(x, -1, -2)
@@ -115,7 +115,7 @@ class MalConvRandomDos(nn.Module):
         return x
 
 
-class MalConvCrossOver(nn.Module):
+class MalConvMaskFirstBlock(nn.Module):
     def __init__(self, input_length=2000000, window_size=500):
         super(MalConv, self).__init__()
 
@@ -133,9 +133,7 @@ class MalConvCrossOver(nn.Module):
         # self.softmax = nn.Softmax()
 
     def forward(self, x):
-        # mask dos part
-        x[:, 0x2:0x18] = 256
-        x[:, 0x1a:0x3c] = 256
+        x = x[:, 500:]
         x = self.embed(x)
         # Channel first
         x = torch.transpose(x, -1, -2)
@@ -152,5 +150,3 @@ class MalConvCrossOver(nn.Module):
         # x = self.sigmoid(x)
 
         return x
-
-
