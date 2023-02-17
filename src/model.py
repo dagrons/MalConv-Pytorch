@@ -117,7 +117,7 @@ class MalConvRandomDos(nn.Module):
 
 class MalConvMaskFirstBlock(nn.Module):
     def __init__(self, input_length=2000000, window_size=500):
-        super(MalConv, self).__init__()
+        super(MalConvMaskFirstBlock, self).__init__()
 
         self.embed = nn.Embedding(257, 8, padding_idx=0)
 
