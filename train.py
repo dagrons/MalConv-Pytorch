@@ -62,10 +62,10 @@ sample_cnt = conf['sample_cnt']
 
 # Load Ground Truth.
 tr_label_table = pd.read_csv(train_label_path,header=None,index_col=0)
-tr_label_table.index=tr_label_table.index.str
+# tr_label_table.index=tr_label_table.index.str
 tr_label_table = tr_label_table.rename(columns={1:'ground_truth'})
 val_label_table = pd.read_csv(valid_label_path,header=None,index_col=0)
-val_label_table.index=val_label_table.index.str
+# val_label_table.index=val_label_table.index.str
 val_label_table = val_label_table.rename(columns={1:'ground_truth'})
 
 
