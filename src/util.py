@@ -6,7 +6,7 @@ def write_pred(test_pred,test_idx,file_path):
     test_pred = [item for sublist in test_pred for item in sublist]
     with open(file_path,'w') as f:
         for idx,pred in zip(test_idx,test_pred):
-            print(idx.upper()+','+str(pred[0]),file=f)
+            print(idx+','+str(pred[0]),file=f)
 
 # Dataset preparation
 class ExeDataset(Dataset):
