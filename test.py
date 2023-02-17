@@ -96,12 +96,8 @@ valid_idx = list(val_table.index)
 del tr_table
 del val_table
 
-model_cls = {
-    'malconv': MalConv,
-    'malconvpadding': MalConvPadding
-}
 
-malconv = model_cls[model_name](input_length=first_n_byte, window_size=window_size)
+malconv = torch.load('/root/MalConv-Pytorch/checkpoint/example_sd_123.model')
 bce_loss = nn.BCEWithLogitsLoss()
 adam_optim = optim.Adam([{'params': malconv.parameters()}], lr=learning_rate)
 sigmoid = nn.Sigmoid()
@@ -125,76 +121,40 @@ valid_best_acc = 0.0
 total_step = 0
 step_cost_time = 0
 
-while total_step < max_step:
+# Testing
+history['val_loss'] = []
+history['val_acc'] = []
+history['val_pred'] = []
 
-    # Training
-    for step, batch_data in enumerate(dataloader):
-        start = time.time()
+for _, val_batch_data in enumerate(tqdm(validloader)):
+    cur_batch_size = val_batch_data[0].size(0)
 
-        adam_optim.zero_grad()
+    exe_input = val_batch_data[0].cuda() if use_gpu else val_batch_data[0]
+    exe_input = Variable(exe_input.long(), requires_grad=False)
 
-        cur_batch_size = batch_data[0].size(0)
+    label = val_batch_data[1].cuda() if use_gpu else val_batch_data[1]
+    label = Variable(label.float(), requires_grad=False)
 
-        exe_input = batch_data[0].cuda() if use_gpu else batch_data[0]
-        exe_input = Variable(exe_input.long(), requires_grad=False)
+    pred = malconv(exe_input)
+    loss = bce_loss(pred, label)
 
-        label = batch_data[1].cuda() if use_gpu else batch_data[1]
-        label = Variable(label.float(), requires_grad=False)
+    history['val_loss'].append(loss.cpu().data.numpy())
+    history['val_acc'].extend(
+        list(label.cpu().data.numpy().astype(int) == (sigmoid(pred).cpu().data.numpy() + 0.5).astype(int)))
+    history['val_pred'].append(list(sigmoid(pred).cpu().data.numpy()))
 
-        pred = malconv(exe_input)
-        loss = bce_loss(pred, label)
-        loss.backward()
-        adam_optim.step()
+print(log_msg.format(total_step, np.mean(history['tr_loss']), np.mean(history['tr_acc']),
+                     np.mean(history['val_loss']), np.mean(history['val_acc']), step_cost_time),
+      file=log, flush=True)
 
-        history['tr_loss'].append(loss.cpu().data.numpy())
-        history['tr_acc'].extend(
-            list(label.cpu().data.numpy().astype(int) == (sigmoid(pred).cpu().data.numpy() + 0.5).astype(int)))
+print(valid_msg.format(total_step, np.mean(history['tr_loss']), np.mean(history['tr_acc']),
+                       np.mean(history['val_loss']), np.mean(history['val_acc'])))
+if valid_best_acc < np.mean(history['val_acc']):
+    valid_best_acc = np.mean(history['val_acc'])
+    torch.save(malconv, chkpt_acc_path)
+    print('Checkpoint saved at', chkpt_acc_path)
+    write_pred(history['val_pred'], valid_idx, pred_path)
+    print('Prediction saved at', pred_path)
 
-        step_cost_time = time.time() - start
-
-        if (step + 1) % display_step == 0:
-            print(step_msg.format(total_step, np.mean(history['tr_loss']),
-                                  np.mean(history['tr_acc']), step_cost_time), end='\r', flush=True)
-        total_step += 1
-
-        # Interupt for validation
-        if total_step % test_step == 0:
-            break
-
-    # Testing
-    history['val_loss'] = []
-    history['val_acc'] = []
-    history['val_pred'] = []
-
-    for _, val_batch_data in enumerate(tqdm(validloader)):
-        cur_batch_size = val_batch_data[0].size(0)
-
-        exe_input = val_batch_data[0].cuda() if use_gpu else val_batch_data[0]
-        exe_input = Variable(exe_input.long(), requires_grad=False)
-
-        label = val_batch_data[1].cuda() if use_gpu else val_batch_data[1]
-        label = Variable(label.float(), requires_grad=False)
-
-        pred = malconv(exe_input)
-        loss = bce_loss(pred, label)
-
-        history['val_loss'].append(loss.cpu().data.numpy())
-        history['val_acc'].extend(
-            list(label.cpu().data.numpy().astype(int) == (sigmoid(pred).cpu().data.numpy() + 0.5).astype(int)))
-        history['val_pred'].append(list(sigmoid(pred).cpu().data.numpy()))
-
-    print(log_msg.format(total_step, np.mean(history['tr_loss']), np.mean(history['tr_acc']),
-                         np.mean(history['val_loss']), np.mean(history['val_acc']), step_cost_time),
-          file=log, flush=True)
-
-    print(valid_msg.format(total_step, np.mean(history['tr_loss']), np.mean(history['tr_acc']),
-                           np.mean(history['val_loss']), np.mean(history['val_acc'])))
-    if valid_best_acc < np.mean(history['val_acc']):
-        valid_best_acc = np.mean(history['val_acc'])
-        torch.save(malconv, chkpt_acc_path)
-        print('Checkpoint saved at', chkpt_acc_path)
-        write_pred(history['val_pred'], valid_idx, pred_path)
-        print('Prediction saved at', pred_path)
-
-    history['tr_loss'] = []
-    history['tr_acc'] = []
+history['tr_loss'] = []
+history['tr_acc'] = []

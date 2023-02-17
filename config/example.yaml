@@ -22,3 +22,5 @@ batch_size: 20            #
 first_n_byte: 2000000     # First N bytes of a PE file as the input of MalConv (defualt: 2 million)
 window_size: 500          # Kernel size & stride for Malconv (defualt : 500)
 sample_cnt: 1             # Number of data sampled for trianing (defualt 1 = all)
+
+model_name: malconv

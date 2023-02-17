@@ -45,6 +45,7 @@ For parameters and options availible, please refer to [`config/example.yaml`](co
 原则：在防御的时候不会引入新的缺陷
 
 ## Positional Encoding
+
 - block positional embedding // positional embedding // to avoid header injection
 - noisy net/gan // 在head前添加noise，防止离群值的出现，有点类似于用GAN进行数据增强的意思了，但这里的gan只是用来进行防御的，gan可以帮助我们的检测器完善决策边界，但愿不会引入bias
 // 对于比较离群的值，判定为阳性
