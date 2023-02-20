@@ -17,7 +17,7 @@ class ExeDataset(Dataset):
         self.data_path = data_path
         self.label_list = label_list
         self.benign_list = []
-        for i in range(label_list):
+        for i in range(len(label_list)):
             if label_list[i] == 0:
                 self.benign_list.append(i)
         self.first_n_byte = first_n_byte
