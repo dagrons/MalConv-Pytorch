@@ -32,7 +32,7 @@ class ExeDataset(Dataset):
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
                 tlen = len(tmp)
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
-                if random.randint(1, 10) <= 5:
+                if random.randint(1, 10) <= 5 and self.label_list[idx] == 1:
                     with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
                         bs = f1.read(self.first_n_byte - tlen)
                         tmp[tlen:tlen+len(bs)] = [i + 1 for i in bs]
@@ -41,7 +41,7 @@ class ExeDataset(Dataset):
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
                 tlen = len(tmp)
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
-                if random.randint(1, 10) <= 5:
+                if random.randint(1, 10) <= 5 and self.label_list[idx] == 1:
                    with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
                         bs = f1.read(self.first_n_byte - tlen)
                         tmp[tlen:tlen+len(bs)] = [i + 1 for i in bs]
