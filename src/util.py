@@ -34,13 +34,16 @@ class ExeDataset(Dataset):
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
                 if random.randint(1, 10) <= 5:
                     with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
-                        tmp[tlen:] = [i + 1 for i in f1.read(self.first_n_byte - tlen)]
+                        bs = f1.read(self.first_n_byte - tlen)
+                        tmp[tlen:tlen+len(bs)] = [i + 1 for i in bs]
         except:
             with open(self.data_path+self.fp_list[idx].lower(),'rb') as f:
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
+                tlen = len(tmp)
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
                 if random.randint(1, 10) <= 5:
-                    with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
-                        tmp[tlen:] = [i + 1 for i in f1.read(self.first_n_byte - tlen)]
+                   with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
+                        bs = f1.read(self.first_n_byte - tlen)
+                        tmp[tlen:tlen+len(bs)] = [i + 1 for i in bs]
 
         return np.array(tmp),np.array([self.label_list[idx]])
