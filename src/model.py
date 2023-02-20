@@ -124,7 +124,7 @@ class MalConvMaskFirstBlock(nn.Module):
         self.conv_1 = nn.Conv1d(4, 128, window_size, stride=window_size, bias=True)
         self.conv_2 = nn.Conv1d(4, 128, window_size, stride=window_size, bias=True)
 
-        self.pooling = nn.MaxPool1d(int((input_length-500) / window_size))
+        self.pooling = nn.MaxPool1d(int((input_length - 500) / window_size))
 
         self.fc_1 = nn.Linear(128, 128)
         self.fc_2 = nn.Linear(128, 1)

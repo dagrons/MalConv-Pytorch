@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -14,19 +16,31 @@ class ExeDataset(Dataset):
         self.fp_list = fp_list
         self.data_path = data_path
         self.label_list = label_list
+        self.benign_list = []
+        for i in range(label_list):
+            if label_list[i] == 0:
+                self.benign_list.append(i)
         self.first_n_byte = first_n_byte
 
     def __len__(self):
         return len(self.fp_list)
 
     def __getitem__(self, idx):
+        idx1 = random.choice(self.benign_list)
         try:
             with open(self.data_path+self.fp_list[idx],'rb') as f:
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
+                tlen = len(tmp)
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
+                if random.randint(1, 10) <= 5:
+                    with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
+                        tmp[tlen:] = [i + 1 for i in f1.read(self.first_n_byte - tlen)]
         except:
             with open(self.data_path+self.fp_list[idx].lower(),'rb') as f:
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
+                if random.randint(1, 10) <= 5:
+                    with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
+                        tmp[tlen:] = [i + 1 for i in f1.read(self.first_n_byte - tlen)]
 
         return np.array(tmp),np.array([self.label_list[idx]])
