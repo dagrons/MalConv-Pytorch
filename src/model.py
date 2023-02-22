@@ -133,7 +133,8 @@ class MalConvMaskFirstBlock(nn.Module):
         # self.softmax = nn.Softmax()
 
     def forward(self, x):
-        x = x[:, 500:]
+        x[:, 0x2:0x18] = 0
+        x[:, 0x1a:0x3c] = 0
         x = self.embed(x)
         # Channel first
         x = torch.transpose(x, -1, -2)
