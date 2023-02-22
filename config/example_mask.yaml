@@ -25,3 +25,4 @@ sample_cnt: 1             # Number of data sampled for trianing (defualt 1 = all
 
 model_name: malconvmask
 enable_dos_mask: True
+enable_noise: False
