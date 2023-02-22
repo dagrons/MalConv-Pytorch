@@ -7,7 +7,7 @@ class MalConv(nn.Module):
     def __init__(self, input_length=2000000, window_size=500, enable_dos_mask=False):
         super(MalConv, self).__init__()
 
-        self.enable_dos_mask = True
+        self.enable_dos_mask = enable_dos_mask
 
         self.embed = nn.Embedding(257, 8, padding_idx=0)
 
