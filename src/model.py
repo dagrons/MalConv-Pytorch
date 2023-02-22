@@ -44,3 +44,17 @@ class MalConv(nn.Module):
 
         return x
 
+    def embed_predict(self, x):
+        x = torch.transpose(x, -1, -2)
+
+        cnn_value = self.conv_1(x.narrow(-2, 0, 4))
+        gating_weight = self.sigmoid(self.conv_2(x.narrow(-2, 4, 4)))
+
+        x = cnn_value * gating_weight
+        x = self.pooling(x)
+
+        x = x.view(-1, 128)
+        x = self.fc_1(x)
+        x = self.fc_2(x)
+        return x
+
