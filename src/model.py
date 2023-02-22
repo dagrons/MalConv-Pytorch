@@ -24,9 +24,11 @@ class MalConv(nn.Module):
 
     def forward(self, x):
         if self.enable_dos_mask:
-            x[:, 0x2:0x18] = 0
-            x[:, 0x1a:0x3c] = 0
-            x[:, 0x40:0x80] = 0
+            mask = torch.ones((x.shape[0], 2000000))
+            mask[:, 0x2:0x18] = 0
+            mask[:, 0x1a:0x3c] = 0
+            mask[:, 0x40:0x80] = 0
+            x = x * mask
         x = self.embed(x)
         # Channel first
         x = torch.transpose(x, -1, -2)
