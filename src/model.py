@@ -23,6 +23,7 @@ class MalConv(nn.Module):
         # self.softmax = nn.Softmax()
 
     def forward(self, x):
+        x = x.clone()
         if self.enable_dos_mask:
             x[:, 0x2:0x18] = 0
             x[:, 0x1a:0x3c] = 0
