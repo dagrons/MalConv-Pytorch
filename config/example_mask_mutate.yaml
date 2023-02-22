@@ -1,4 +1,4 @@
-exp_name: 'example'
+exp_name: 'example_mask_mutate'
 
 ### Data path
 train_data_path: 'data/train/'                    # Training data
