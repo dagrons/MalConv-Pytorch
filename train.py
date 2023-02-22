@@ -58,6 +58,8 @@ display_step = conf['display_step']
 sample_cnt = conf['sample_cnt']
 
 model_name = conf['model_name']
+enable_noise = conf['enable_noise']
+enable_dos_mask = conf['enable_dos_mask']
 
 # Load Ground Truth.
 tr_label_table = pd.read_csv(train_label_path, header=None, index_col=0)
@@ -87,21 +89,16 @@ print('\tGoodware Count:', val_table['ground_truth'].value_counts()[0])
 if sample_cnt != 1:
     tr_table = tr_table.sample(n=sample_cnt, random_state=seed)
 
-dataloader = DataLoader(ExeDataset(list(tr_table.index), train_data_path, list(tr_table.ground_truth), first_n_byte),
+dataloader = DataLoader(ExeDataset(list(tr_table.index), train_data_path, list(tr_table.ground_truth), enable_noise, first_n_byte),
                         batch_size=batch_size, shuffle=True, num_workers=use_cpu)
-validloader = DataLoader(ExeDataset(list(val_table.index), valid_data_path, list(val_table.ground_truth), first_n_byte),
+validloader = DataLoader(ExeDataset(list(val_table.index), valid_data_path, list(val_table.ground_truth), enable_noise, first_n_byte),
                          batch_size=batch_size, shuffle=False, num_workers=use_cpu)
 
 valid_idx = list(val_table.index)
 del tr_table
 del val_table
 
-model_cls = {
-    'malconv': MalConv,
-    'malconvmask': MalConvMaskFirstBlock
-}
-
-malconv = model_cls[model_name](input_length=first_n_byte, window_size=window_size)
+malconv = MalConv(input_length=first_n_byte, window_size=window_size, enable_dos_mask=enable_dos_mask)
 bce_loss = nn.BCEWithLogitsLoss()
 adam_optim = optim.Adam([{'params': malconv.parameters()}], lr=learning_rate)
 sigmoid = nn.Sigmoid()

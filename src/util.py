@@ -12,7 +12,7 @@ def write_pred(test_pred,test_idx,file_path):
 
 # Dataset preparation
 class ExeDataset(Dataset):
-    def __init__(self, fp_list, data_path, label_list, first_n_byte=2000000):
+    def __init__(self, fp_list, data_path, label_list, enable_noise=False, first_n_byte=2000000):
         self.fp_list = fp_list
         self.data_path = data_path
         self.label_list = label_list
@@ -21,6 +21,7 @@ class ExeDataset(Dataset):
             if label_list[i] == 0:
                 self.benign_list.append(i)
         self.first_n_byte = first_n_byte
+        self.enable_noise = enable_noise
 
     def __len__(self):
         return len(self.fp_list)
@@ -32,7 +33,7 @@ class ExeDataset(Dataset):
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
                 tlen = len(tmp)
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
-                if random.randint(1, 10) <= 5 and self.label_list[idx] == 1:
+                if self.enable_noise and random.randint(1, 10) <= 5 and self.label_list[idx] == 1:
                     with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
                         bs = f1.read(self.first_n_byte - tlen)
                         tmp[tlen:tlen+len(bs)] = [i + 1 for i in bs]
@@ -41,7 +42,7 @@ class ExeDataset(Dataset):
                 tmp = [i+1 for i in f.read()[:self.first_n_byte]]
                 tlen = len(tmp)
                 tmp = tmp+[0]*(self.first_n_byte-len(tmp))
-                if random.randint(1, 10) <= 5 and self.label_list[idx] == 1:
+                if self.enable_noise and random.randint(1, 10) <= 5 and self.label_list[idx] == 1:
                    with open(self.data_path+self.fp_list[idx1], 'rb') as f1:
                         bs = f1.read(self.first_n_byte - tlen)
                         tmp[tlen:tlen+len(bs)] = [i + 1 for i in bs]
