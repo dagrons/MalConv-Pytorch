@@ -9,10 +9,11 @@ class MalConv(nn.Module):
 
         self.enable_dos_mask = enable_dos_mask
         if self.enable_dos_mask:
-            self.mask = torch.ones((2000000, )).type(torch.int)
-            self.mask[0x2:0x18] = 0
-            self.mask[0x1a:0x3c] = 0
-            self.mask[0x40:0x80] = 0
+            mask = torch.ones((2000000,)).type(torch.int)
+            mask[0x2:0x18] = 0
+            mask[0x1a:0x3c] = 0
+            mask[0x40:0x80] = 0
+            self.mask = nn.Parameter(mask, requires_grad=False)  # 这样可以随着model.to(device)转到gpu
 
         self.embed = nn.Embedding(257, 8, padding_idx=0)
 
@@ -59,4 +60,3 @@ class MalConv(nn.Module):
         x = self.fc_1(x)
         x = self.fc_2(x)
         return x
-
