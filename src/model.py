@@ -29,7 +29,8 @@ class MalConv(nn.Module):
         # self.softmax = nn.Softmax()
 
     def forward(self, x):
-        x = x * self.mask
+        if self.enable_dos_mask:
+            x = x * self.mask
         x = self.embed(x)
         # Channel first
         x = torch.transpose(x, -1, -2)
