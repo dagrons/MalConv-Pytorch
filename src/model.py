@@ -8,6 +8,11 @@ class MalConv(nn.Module):
         super(MalConv, self).__init__()
 
         self.enable_dos_mask = enable_dos_mask
+        if self.enable_dos_mask:
+            self.mask = torch.ones((2000000, )).type(torch.int)
+            self.mask[0x2:0x18] = 0
+            self.mask[0x1a:0x3c] = 0
+            self.mask[0x40:0x80] = 0
 
         self.embed = nn.Embedding(257, 8, padding_idx=0)
 
@@ -23,11 +28,7 @@ class MalConv(nn.Module):
         # self.softmax = nn.Softmax()
 
     def forward(self, x):
-        x = x.clone()
-        if self.enable_dos_mask:
-            x[:, 0x2:0x18] = 0
-            x[:, 0x1a:0x3c] = 0
-            x[:, 0x40:0x80] = 0
+        x = x * self.mask
         x = self.embed(x)
         # Channel first
         x = torch.transpose(x, -1, -2)
