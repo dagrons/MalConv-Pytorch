@@ -82,6 +82,7 @@ sample_cnt = conf['sample_cnt']
 model_name = conf['model_name']
 enable_noise = conf['enable_noise']
 enable_dos_mask = conf['enable_dos_mask']
+enable_fgm_attack = "enable_fgm_attack" in conf and conf['enable_fgm_attack']
 
 # Load Ground Truth.
 tr_label_table = pd.read_csv(train_label_path, header=None, index_col=0)
@@ -166,13 +167,12 @@ while total_step < max_step:
         pred = malconv(exe_input)
         loss = bce_loss(pred, label)
         loss.backward()
-        # attack
-        fgm.attack()
-        # second pass
-        pred = malconv(exe_input)
-        loss_sum = bce_loss(pred, label)
-        loss_sum.backward()
-        fgm.restore()
+        if enable_fgm_attack:
+            fgm.attack()
+            pred = malconv(exe_input)
+            loss_sum = bce_loss(pred, label)
+            loss_sum.backward()
+            fgm.restore()
         adam_optim.step()
 
         history['tr_loss'].append(loss.cpu().data.numpy())
