@@ -14,6 +14,28 @@ import torch.optim as optim
 from torch.autograd import Variable
 from tqdm import tqdm
 
+
+class FGM():
+    def __init__(self, model):
+        self.model = model
+        self.backup = {}
+
+    def attack(self, epsilon=1, emb_name="embed"):
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                self.backup[name] = param.data.clone()
+                norm = torch.norm(param.grad)
+                if norm != 0:
+                    r_at = epsilon * param.grad / norm
+                    param.data.add_(r_at)
+
+    def restore(self, emb_name='emb'):
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                assert name in self.backup
+                param.data = self.backup[name]
+        self.backup = {}
+
 # Load config file for experiment
 try:
     config_path = sys.argv[1]
@@ -122,6 +144,8 @@ valid_best_acc = 0.0
 total_step = 0
 step_cost_time = 0
 
+fgm = FGM(malconv)
+
 while total_step < max_step:
 
     # Training
@@ -138,9 +162,17 @@ while total_step < max_step:
         label = batch_data[1].cuda() if use_gpu else batch_data[1]
         label = Variable(label.float(), requires_grad=False)
 
+        # first pass
         pred = malconv(exe_input)
         loss = bce_loss(pred, label)
         loss.backward()
+        # attack
+        fgm.attack()
+        # second pass
+        pred = malconv(exe_input)
+        loss_sum = bce_loss(pred, label)
+        loss_sum.backward()
+        fgm.restore()
         adam_optim.step()
 
         history['tr_loss'].append(loss.cpu().data.numpy())
@@ -162,6 +194,8 @@ while total_step < max_step:
     history['val_loss'] = []
     history['val_acc'] = []
     history['val_pred'] = []
+
+    fgm = FGM(malconv)
 
     for _, val_batch_data in enumerate(tqdm(validloader)):
         cur_batch_size = val_batch_data[0].size(0)
