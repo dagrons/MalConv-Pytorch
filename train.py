@@ -67,7 +67,7 @@ chkpt_acc_path = checkpoint_dir + exp_name + '.model'
 pred_path = pred_dir + exp_name + '.pred'
 
 # Parameters
-use_gpu = torch.cuda.is_cuda_available() and conf['use_gpu']
+use_gpu = torch.cuda.is_available() and conf['use_gpu']
 use_cpu = conf['use_cpu']
 learning_rate = conf['learning_rate']
 max_step = conf['max_step']
