@@ -86,7 +86,7 @@ num_layers = conf['num_layers']
 bidirectional = conf['bidirectional']
 residual = conf['residual']
 model_name = conf['model_name']
-atten_size = conf['atten_size']
+attn_size = conf['attn_size']
 
 sample_cnt = conf['sample_cnt']
 
@@ -137,7 +137,7 @@ if model_name == "malconv":
 elif model_name == "rcnn":
     model = RCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, residual)
 elif model_name == "attentionrcnn":
-    model = AttentionRCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, atten_size, residual)
+    model = AttentionRCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, attn_size, residual)
 bce_loss = nn.BCEWithLogitsLoss()
 adam_optim = optim.Adam([{'params': model.parameters()}], lr=learning_rate)
 sigmoid = nn.Sigmoid()
