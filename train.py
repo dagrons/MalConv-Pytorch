@@ -136,7 +136,7 @@ if model_name == "malconv":
     model = MalConv(input_length=first_n_byte, window_size=window_size, enable_dos_mask=enable_dos_mask)
 elif model_name == "rcnn":
     model = RCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, residual)
-elif model_name == "attentionrcnn":
+elif model_name == "attnrcnn":
     model = AttentionRCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, attn_size, residual)
 bce_loss = nn.BCEWithLogitsLoss()
 adam_optim = optim.Adam([{'params': model.parameters()}], lr=learning_rate)

@@ -1,0 +1,37 @@
+exp_name: 'example_attnrcnn'
+
+### Data path
+train_data_path: 'data/train/'                    # Training data
+train_label_path: 'data/example-train-label.csv' # Training label
+valid_data_path: 'data/valid/'                    # Validation Data
+valid_label_path: 'data/example-valid-label.csv' # Validation Label
+
+### output path
+log_dir: 'log/'
+pred_dir: 'pred/'
+checkpoint_dir: 'checkpoint/'
+
+### Parameter
+use_gpu: True             #
+use_cpu: 1                # Number of cores to use for data loader
+display_step: 2           # Std output update rate during training
+test_step: 400             # Test per n step
+learning_rate: 0.0001     #
+max_step: 1000            # Number of steps to train
+batch_size: 20            #
+sample_cnt: 1             # Number of data sampled for trianing (defualt 1 = all)
+first_n_byte: 4096     # First N bytes of a PE file as the input of MalConv (defualt: 2 million)
+
+embed_dim: 16     # First N bytes of a PE file as the input of MalConv (defualt: 2 million)
+out_channels: 128
+window_size: 32          # Kernel size & stride for Malconv (defualt : 500)
+hidden_size: 256
+num_layers: 3
+bidirectional: True
+attn_size: 128
+residual: True
+
+model_name: attnrcnn
+enable_dos_mask: False
+enable_noise: False
+enable_fgm_attack: False
