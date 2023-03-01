@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as F, GRU
 
 
 class MalConv(nn.Module):
@@ -69,7 +69,6 @@ class RCNN(nn.Module):
             embed_dim,
             out_channels,
             window_size,
-            module,
             hidden_size,
             num_layers,
             bidirectional,
@@ -77,11 +76,6 @@ class RCNN(nn.Module):
             dropout=0.5,
     ):
         super(RCNN, self).__init__()
-        assert module.__name__ in {
-            "RNN",
-            "GRU",
-            "LSTM",
-        }, "`module` must be a `torch.nn` recurrent layer"
         self.residual = residual
         self.embed = nn.Embedding(257, embed_dim)
         self.conv = nn.Conv1d(
@@ -90,7 +84,7 @@ class RCNN(nn.Module):
             kernel_size=window_size,
             stride=window_size,
         )
-        self.rnn = module(
+        self.rnn = GRU(
             input_size=out_channels,
             hidden_size=hidden_size,
             num_layers=num_layers,
@@ -124,7 +118,6 @@ class AttentionRCNN(nn.Module):
             embed_dim,
             out_channels,
             window_size,
-            module,
             hidden_size,
             num_layers,
             bidirectional,
@@ -133,11 +126,6 @@ class AttentionRCNN(nn.Module):
             dropout=0.5,
     ):
         super(AttentionRCNN, self).__init__()
-        assert module.__name__ in {
-            "RNN",
-            "GRU",
-            "LSTM",
-        }, "`module` must be a `torch.nn` recurrent layer"
         self.residual = residual
         self.embed = nn.Embedding(257, embed_dim)
         self.conv = nn.Conv1d(
@@ -146,7 +134,7 @@ class AttentionRCNN(nn.Module):
             kernel_size=window_size,
             stride=window_size,
         )
-        self.rnn = module(
+        self.rnn = GRU(
             input_size=out_channels,
             hidden_size=hidden_size,
             num_layers=num_layers,
