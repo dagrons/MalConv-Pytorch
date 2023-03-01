@@ -1,4 +1,4 @@
-exp_name: 'example_rcnn_mask'
+exp_name: 'example_rcnn_mask_fgm'
 
 ### Data path
 train_data_path: 'data/train/'                    # Training data
