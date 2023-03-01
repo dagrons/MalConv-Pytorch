@@ -74,9 +74,17 @@ class RCNN(nn.Module):
             num_layers,
             bidirectional,
             residual,
+            enable_dos_mask=False,
             dropout=0.5,
     ):
         super(RCNN, self).__init__()
+        self.enable_dos_mask = enable_dos_mask
+        if self.enable_dos_mask:
+            mask = torch.ones((2000000,)).type(torch.int)
+            mask[0x2:0x18] = 0
+            mask[0x1a:0x3c] = 0
+            mask[0x40:0x80] = 0
+            self.mask = nn.Parameter(mask, requires_grad=False)  # 这样可以随着model.to(device)转到gpu
         self.residual = residual
         self.embed = nn.Embedding(257, embed_dim)
         self.conv = nn.Conv1d(
@@ -99,7 +107,23 @@ class RCNN(nn.Module):
             self.fc = nn.Linear(rnn_out_size, 1)
 
     def forward(self, x):
+        if self.enable_dos_mask:
+            x = x * self.mask
         embedding = self.dropout(self.embed(x))
+        conv_in = embedding.permute(0, 2, 1)
+        conv_out = self.conv(conv_in)
+        if self.residual:
+            values, _ = conv_out.max(dim=-1)
+        conv_out = conv_out.permute(2, 0, 1)
+        rnn_out, _ = self.rnn(conv_out)
+        fc_in = rnn_out[-1]
+        if self.residual:
+            fc_in = torch.cat((fc_in, values), dim=-1)
+        output = self.fc(fc_in)
+        return output
+
+    def embed_predict(self, x):
+        embedding = self.dropout(x)
         conv_in = embedding.permute(0, 2, 1)
         conv_out = self.conv(conv_in)
         if self.residual:
@@ -124,9 +148,17 @@ class AttentionRCNN(nn.Module):
             bidirectional,
             attn_size,
             residual,
+            enable_dos_mask=False,
             dropout=0.5,
     ):
         super(AttentionRCNN, self).__init__()
+        self.enable_dos_mask = enable_dos_mask
+        if self.enable_dos_mask:
+            mask = torch.ones((2000000,)).type(torch.int)
+            mask[0x2:0x18] = 0
+            mask[0x1a:0x3c] = 0
+            mask[0x40:0x80] = 0
+            self.mask = nn.Parameter(mask, requires_grad=False)  # 这样可以随着model.to(device)转到gpu
         self.residual = residual
         self.embed = nn.Embedding(257, embed_dim)
         self.conv = nn.Conv1d(
@@ -154,7 +186,29 @@ class AttentionRCNN(nn.Module):
             self.fc = nn.Linear(rnn_out_size, 1)
 
     def forward(self, x):
+        if self.enable_dos_mask:
+            x = x * self.mask
         embedding = self.dropout(self.embed(x))
+        conv_in = embedding.permute(0, 2, 1)
+        conv_out = self.conv(conv_in)
+        if self.residual:
+            values, _ = conv_out.max(dim=-1)
+        conv_out = conv_out.permute(2, 0, 1)
+        rnn_out, _ = self.rnn(conv_out)
+        global_rnn_out = rnn_out.mean(dim=0)
+        attention = torch.tanh(
+            self.local2attn(rnn_out) + self.global2attn(global_rnn_out)
+        ).permute(1, 0, 2)
+        alpha = F.softmax(attention.matmul(self.attn_scale), dim=-1)
+        rnn_out = rnn_out.permute(1, 0, 2)
+        fc_in = (alpha * rnn_out).sum(dim=1)
+        if self.residual:
+            fc_in = torch.cat((fc_in, values), dim=-1)
+        output = self.fc(fc_in)
+        return output
+
+    def embed_predict(self, x):
+        embedding = self.dropout(x)
         conv_in = embedding.permute(0, 2, 1)
         conv_out = self.conv(conv_in)
         if self.residual:
