@@ -109,7 +109,7 @@ class RCNN(nn.Module):
         fc_in = rnn_out[-1]
         if self.residual:
             fc_in = torch.cat((fc_in, values), dim=-1)
-        output = self.fc(fc_in).squeeze(1)
+        output = self.fc(fc_in)
         return output
 
 
@@ -170,5 +170,5 @@ class AttentionRCNN(nn.Module):
         fc_in = (alpha * rnn_out).sum(dim=1)
         if self.residual:
             fc_in = torch.cat((fc_in, values), dim=-1)
-        output = self.fc(fc_in).squeeze(1)
+        output = self.fc(fc_in)
         return output
