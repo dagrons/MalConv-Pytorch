@@ -32,3 +32,6 @@ attn_size: 128
 residual: True
 
 model_name: rcnn
+enable_dos_mask: False
+enable_noise: False
+enable_fgm_attack: False
