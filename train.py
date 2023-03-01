@@ -6,7 +6,7 @@ import yaml
 import numpy as np
 import pandas as pd
 from src.util import ExeDataset, write_pred
-from src.model import MalConv
+from src.model import MalConv, RCNN, AttentionRCNN
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
@@ -77,6 +77,17 @@ first_n_byte = conf['first_n_byte']
 window_size = conf['window_size']
 display_step = conf['display_step']
 
+# added parameters
+embed_dim = conf['embed_dim']
+out_channels = conf['out_channels']
+window_size = conf['window_size']
+hidden_size = conf['hidden_size']
+num_layers = conf['num_layers']
+bidirectional = conf['bidirectional']
+residual = conf['residual']
+model_name = conf['model_name']
+atten_size = conf['atten_size']
+
 sample_cnt = conf['sample_cnt']
 
 model_name = conf['model_name']
@@ -121,13 +132,18 @@ valid_idx = list(val_table.index)
 del tr_table
 del val_table
 
-malconv = MalConv(input_length=first_n_byte, window_size=window_size, enable_dos_mask=enable_dos_mask)
+if model_name == "malconv":
+    model = MalConv(input_length=first_n_byte, window_size=window_size, enable_dos_mask=enable_dos_mask)
+elif model_name == "rcnn":
+    model = RCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, residual)
+elif model_name == "attentionrcnn":
+    model = AttentionRCNN(embed_dim, out_channels, window_size, hidden_size, num_layers, bidirectional, atten_size, residual)
 bce_loss = nn.BCEWithLogitsLoss()
-adam_optim = optim.Adam([{'params': malconv.parameters()}], lr=learning_rate)
+adam_optim = optim.Adam([{'params': model.parameters()}], lr=learning_rate)
 sigmoid = nn.Sigmoid()
 
 if use_gpu:
-    malconv = malconv.cuda()
+    model = model.cuda()
     bce_loss = bce_loss.cuda()
     sigmoid = sigmoid.cuda()
 
@@ -145,7 +161,7 @@ valid_best_acc = 0.0
 total_step = 0
 step_cost_time = 0
 
-fgm = FGM(malconv)
+fgm = FGM(model)
 
 while total_step < max_step:
 
@@ -164,12 +180,12 @@ while total_step < max_step:
         label = Variable(label.float(), requires_grad=False)
 
         # first pass
-        pred = malconv(exe_input)
+        pred = model(exe_input)
         loss = bce_loss(pred, label)
         loss.backward()
         if enable_fgm_attack:
             fgm.attack()
-            pred = malconv(exe_input)
+            pred = model(exe_input)
             loss_sum = bce_loss(pred, label)
             loss_sum.backward()
             fgm.restore()
@@ -195,7 +211,7 @@ while total_step < max_step:
     history['val_acc'] = []
     history['val_pred'] = []
 
-    fgm = FGM(malconv)
+    fgm = FGM(model)
 
     for _, val_batch_data in enumerate(tqdm(validloader)):
         cur_batch_size = val_batch_data[0].size(0)
@@ -206,7 +222,7 @@ while total_step < max_step:
         label = val_batch_data[1].cuda() if use_gpu else val_batch_data[1]
         label = Variable(label.float(), requires_grad=False)
 
-        pred = malconv(exe_input)
+        pred = model(exe_input)
         loss = bce_loss(pred, label)
 
         history['val_loss'].append(loss.cpu().data.numpy())
@@ -222,7 +238,7 @@ while total_step < max_step:
                            np.mean(history['val_loss']), np.mean(history['val_acc'])))
     if valid_best_acc < np.mean(history['val_acc']):
         valid_best_acc = np.mean(history['val_acc'])
-        torch.save(malconv, chkpt_acc_path)
+        torch.save(model, chkpt_acc_path)
         print('Checkpoint saved at', chkpt_acc_path)
         write_pred(history['val_pred'], valid_idx, pred_path)
         print('Prediction saved at', pred_path)
