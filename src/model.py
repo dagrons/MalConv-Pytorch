@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F, GRU
+import torch.nn.functional as F
+from torch.nn import GRU
 
 
 class MalConv(nn.Module):
