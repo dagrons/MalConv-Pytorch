@@ -41,7 +41,8 @@ try:
     config_path = sys.argv[1]
     seed = int(sys.argv[2])
     conf = yaml.full_load(open(config_path, 'r'))
-except:
+except Exception as e:
+    print(e)
     print('Usage: python3 run_exp.py <config file path> <seed>')
     sys.exit()
 
