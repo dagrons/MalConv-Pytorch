@@ -31,7 +31,7 @@ bidirectional: True
 attn_size: 256
 residual: True
 
-model_name: attnrcnn_mask_fgm
+model_name: attnrcnn
 enable_dos_mask: True
 enable_noise: False
 enable_fgm_attack: True
