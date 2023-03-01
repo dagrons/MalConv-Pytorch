@@ -28,7 +28,7 @@ window_size: 32          # Kernel size & stride for Malconv (defualt : 500)
 hidden_size: 256
 num_layers: 3
 bidirectional: True
-attn_size: 128
+attn_size: 256
 residual: True
 
 model_name: attnrcnn
