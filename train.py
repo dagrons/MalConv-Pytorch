@@ -75,20 +75,20 @@ learning_rate = conf['learning_rate']
 max_step = conf['max_step']
 test_step = conf['test_step']
 batch_size = conf['batch_size']
-first_n_byte = conf['first_n_byte']
-window_size = conf['window_size']
 display_step = conf['display_step']
 
-# added parameters
-embed_dim = conf['embed_dim']
-out_channels = conf['out_channels']
-window_size = conf['window_size']
-hidden_size = conf['hidden_size']
-num_layers = conf['num_layers']
-bidirectional = conf['bidirectional']
-residual = conf['residual']
+first_n_byte = conf['first_n_byte']
 model_name = conf['model_name']
-attn_size = conf['attn_size']
+# parameters for rcnn and attenrcnn
+if model_name in ['rcnn', 'attnrcnn']:
+    embed_dim = conf['embed_dim']
+    out_channels = conf['out_channels']
+    window_size = conf['window_size']
+    hidden_size = conf['hidden_size']
+    num_layers = conf['num_layers']
+    bidirectional = conf['bidirectional']
+    residual = conf['residual']
+    attn_size = conf['attn_size']
 
 sample_cnt = conf['sample_cnt']
 
