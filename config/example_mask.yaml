@@ -23,6 +23,6 @@ first_n_byte: 2000000     # First N bytes of a PE file as the input of MalConv (
 window_size: 500          # Kernel size & stride for Malconv (defualt : 500)
 sample_cnt: 1             # Number of data sampled for trianing (defualt 1 = all)
 
-model_name: malconvmask
+model_name: malconv
 enable_dos_mask: True
 enable_noise: False
