@@ -80,7 +80,7 @@ class RCNN(nn.Module):
         super(RCNN, self).__init__()
         self.enable_dos_mask = enable_dos_mask
         if self.enable_dos_mask:
-            mask = torch.ones((2000000,)).type(torch.int)
+            mask = torch.ones((4096,)).type(torch.int)
             mask[0x2:0x18] = 0
             mask[0x1a:0x3c] = 0
             mask[0x40:0x80] = 0
@@ -154,7 +154,7 @@ class AttentionRCNN(nn.Module):
         super(AttentionRCNN, self).__init__()
         self.enable_dos_mask = enable_dos_mask
         if self.enable_dos_mask:
-            mask = torch.ones((2000000,)).type(torch.int)
+            mask = torch.ones((4096,)).type(torch.int)
             mask[0x2:0x18] = 0
             mask[0x1a:0x3c] = 0
             mask[0x40:0x80] = 0
